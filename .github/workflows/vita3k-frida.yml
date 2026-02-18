@@ -49,6 +49,13 @@ jobs:
       - name: Run unit tests
         run: python -m pytest -q
 
+      - name: Validate Vita3K upstream release strategy
+        if: env.ACT != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPSTREAM_REPOSITORY: Vita3K/Vita3K
+        run: scripts/ci/validate_vita3k_release_strategy.sh
+
       - name: Fetch latest Vita3K metadata
         id: latest
         run: scripts/ci/latest_vita3k.sh
