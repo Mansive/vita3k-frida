@@ -1,6 +1,6 @@
 # Vita3K Frida APK Repacker
 
-This repository provides Android releases of [Vita3K](https://github.com/Vita3K/Vita3K) repacked with [frida-gadget](https://github.com/frida/frida).
+This repository provides Android releases of [Vita3K](https://github.com/Vita3K/Vita3K) repacked with [frida-gadget](https://github.com/frida/frida) for instrumentation through PuniArk.
 
 ## Important updater note
 
