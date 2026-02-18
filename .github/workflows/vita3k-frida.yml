@@ -131,5 +131,5 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "${{ steps.resolve.outputs.release_tag }}" "${{ steps.sign.outputs.final_apk }}" \
-            --title "${{ steps.latest.outputs.build_number }}" \
+            --title "${{ steps.resolve.outputs.release_title }}" \
             --notes "Automated Vita3K Frida build from upstream continuous build ${{ steps.latest.outputs.build_number }}. Disable Check For Updates in-app to avoid signature mismatch with the upstream installer."

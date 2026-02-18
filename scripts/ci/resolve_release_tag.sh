@@ -44,17 +44,21 @@ fi
 base_exists=$(printf '%s' "$tags_json" | jq -r --arg base "$BASE_TAG" '[.[].tag_name == $base] | any')
 
 if [[ "$base_exists" == "false" ]]; then
+  release_title="${BASE_TAG#v}"
   {
     echo "build=true"
     echo "release_tag=${BASE_TAG}"
+    echo "release_title=${release_title}"
   } >> "${GITHUB_OUTPUT}"
   exit 0
 fi
 
 if [[ "$rebuild" != "true" ]]; then
+  release_title="${BASE_TAG#v}"
   {
     echo "build=false"
     echo "release_tag=${BASE_TAG}"
+    echo "release_title=${release_title}"
   } >> "${GITHUB_OUTPUT}"
   exit 0
 fi
@@ -68,8 +72,10 @@ max_suffix=$(printf '%s' "$tags_json" | jq -r --arg pattern "$suffix_pattern" '
 
 next_suffix=$((max_suffix + 1))
 resolved_tag="${BASE_TAG}-r${next_suffix}"
+release_title="${resolved_tag#v}"
 
 {
   echo "build=true"
   echo "release_tag=${resolved_tag}"
+  echo "release_title=${release_title}"
 } >> "${GITHUB_OUTPUT}"
