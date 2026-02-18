@@ -1,0 +1,15 @@
+[project]
+name = "vita3k-frida"
+version = "0.1.0"
+description = "Repack Vita3K Android builds with frida-gadget"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "lief>=0.17.3",
+    "requests>=2.32.5",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.0.2",
+]

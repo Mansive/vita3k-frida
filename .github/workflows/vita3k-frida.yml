@@ -1,0 +1,128 @@
+name: Build Vita3K Frida APK
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      rebuild:
+        description: "Create a rebuild tag when a release already exists (v0.0.BUILD-rN)"
+        required: false
+        default: "false"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      PACKAGE_NAME: org.vita3k.emulator
+      APKTOOL_VERSION: "2.12.1"
+      ANDROID_BUILD_TOOLS_VERSION: "36.0.0"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Ensure CI scripts are executable
+        run: chmod +x scripts/ci/*.sh
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install lief requests pytest
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Run unit tests
+        run: python -m pytest -q
+
+      - name: Fetch latest Vita3K metadata
+        id: latest
+        run: scripts/ci/latest_vita3k.sh
+
+      - name: Resolve release tag
+        id: resolve
+        env:
+          BASE_TAG: ${{ steps.latest.outputs.release_tag }}
+          REBUILD: ${{ inputs.rebuild }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: scripts/ci/resolve_release_tag.sh
+
+      - name: Skip build when release exists
+        if: steps.resolve.outputs.build != 'true'
+        run: echo "Release ${{ steps.resolve.outputs.release_tag }} already exists."
+
+      - name: Download latest APK
+        if: steps.resolve.outputs.build == 'true'
+        id: download
+        run: scripts/ci/download_vita3k.sh downloads
+
+      - name: Install Android build-tools
+        if: steps.resolve.outputs.build == 'true'
+        run: scripts/ci/install_android_tools.sh
+
+      - name: Download apktool
+        if: steps.resolve.outputs.build == 'true'
+        id: apktool
+        run: scripts/ci/download_apktool.sh
+
+      - name: Repack APK (unsigned)
+        if: steps.resolve.outputs.build == 'true'
+        id: repack
+        env:
+          APK_PATH: ${{ steps.download.outputs.apk_path }}
+          APKTOOL_JAR: ${{ steps.apktool.outputs.apktool_jar }}
+          BUILD_NUMBER: ${{ steps.latest.outputs.build_number }}
+        run: scripts/ci/repack_unsigned.sh
+
+      - name: Prepare signing keystore
+        if: steps.resolve.outputs.build == 'true' && env.ACT != 'true'
+        env:
+          ANDROID_KEYSTORE_P12_B64: ${{ secrets.ANDROID_KEYSTORE_P12_B64 }}
+        run: scripts/ci/prepare_keystore.sh
+
+      - name: Sign and verify APK
+        if: steps.resolve.outputs.build == 'true' && env.ACT != 'true'
+        id: sign
+        env:
+          ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          UNSIGNED_APK: ${{ steps.repack.outputs.unsigned_apk }}
+          BUILD_NUMBER: ${{ steps.latest.outputs.build_number }}
+        run: scripts/ci/sign_apk.sh
+
+      - name: Upload unsigned artifact (act)
+        if: steps.resolve.outputs.build == 'true' && env.ACT == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vita3k-frida-unsigned
+          path: ${{ steps.repack.outputs.unsigned_apk }}
+
+      - name: Upload signed artifact
+        if: steps.resolve.outputs.build == 'true' && env.ACT != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vita3k-frida-signed
+          path: ${{ steps.sign.outputs.final_apk }}
+
+      - name: Create GitHub release
+        if: steps.resolve.outputs.build == 'true' && env.ACT != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.resolve.outputs.release_tag }}" "${{ steps.sign.outputs.final_apk }}" \
+            --title "${{ steps.resolve.outputs.release_tag }}" \
+            --notes "Automated Vita3K Frida build from upstream continuous channel.\n\nUpstream build: ${{ steps.latest.outputs.build_number }}\nUpstream commit: ${{ steps.latest.outputs.commit_sha }}\nUpstream APK SHA256: ${{ steps.latest.outputs.apk_sha256 }}\n\nNote: In Vita3K settings, disable Check For Updates to avoid signature mismatch with upstream installer."
