@@ -2,13 +2,10 @@
 
 This repository provides Android releases of [Vita3K](https://github.com/Vita3K/Vita3K) repacked with [frida-gadget](https://github.com/frida/frida) for instrumentation through PuniArk.
 
-## Important updater note
-
-Vita3K's built-in updater currently doesn't work. It's suggested to update through the app through Obtanium instead. To disable the in-app update check:
-
-- `Configuration` -> `Settings` -> `Emulator` -> uncheck `Check For Updates`
-
-Vita3K's built-in updater downloads the official `continuous/android-latest.apk`, which cannot install over a differently signed APK.
+> [!WARNING]
+> Vita3K's built-in updater currently doesn't work. It's suggested to update through the app through Obtanium instead. To disable the in-app update check:
+>
+> - `Configuration` -> `Settings` -> `Emulator` -> uncheck `Check For Updates`
 
 ## Local scripts
 
