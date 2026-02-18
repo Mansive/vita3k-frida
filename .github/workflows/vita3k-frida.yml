@@ -125,4 +125,4 @@ jobs:
         run: |
           gh release create "${{ steps.resolve.outputs.release_tag }}" "${{ steps.sign.outputs.final_apk }}" \
             --title "${{ steps.resolve.outputs.release_tag }}" \
-            --notes "Automated Vita3K Frida build from upstream continuous channel.\n\nUpstream build: ${{ steps.latest.outputs.build_number }}\nUpstream commit: ${{ steps.latest.outputs.commit_sha }}\nUpstream APK SHA256: ${{ steps.latest.outputs.apk_sha256 }}\n\nNote: In Vita3K settings, disable Check For Updates to avoid signature mismatch with upstream installer."
+            --notes "Automated Vita3K Frida build from upstream continuous build ${{ steps.latest.outputs.build_number }}. Disable Check For Updates in-app to avoid signature mismatch with the upstream installer."
