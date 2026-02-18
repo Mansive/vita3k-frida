@@ -13,7 +13,7 @@ commit_sha=$(printf '%s' "$metadata_json" | jq -r '.commit_sha')
 apk_name=$(printf '%s' "$metadata_json" | jq -r '.apk_name')
 apk_url=$(printf '%s' "$metadata_json" | jq -r '.apk_url')
 apk_sha256=$(printf '%s' "$metadata_json" | jq -r '.apk_sha256')
-release_tag="v0.0.${build_number}"
+release_tag="v${build_number}"
 
 {
   echo "build_number=${build_number}"

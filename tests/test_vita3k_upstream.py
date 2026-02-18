@@ -50,7 +50,7 @@ def test_fetch_latest_vita3k_metadata_parses_continuous_release() -> None:
     assert metadata["package_name"] == "org.vita3k.emulator"
     assert metadata["build_number"] == 3923
     assert metadata["commit_sha"] == "3b42fa3587c9da043a5113bc89497ac8f9e68fa0"
-    assert metadata["release_tag"] == "v0.0.3923"
+    assert metadata["release_tag"] == "v3923"
     assert metadata["apk_name"] == "android-latest.apk"
     assert (
         metadata["apk_sha256"]

@@ -45,8 +45,8 @@ Vita3K's built-in updater downloads the official `continuous/android-latest.apk`
 
 ## Release tag strategy
 
-- Base tag: `v0.0.{upstream_build_number}`
-- Rebuild tags: `v0.0.{upstream_build_number}-r1`, `-r2`, ...
+- Base tag: `v{upstream_build_number}`
+- Rebuild tags: `v{upstream_build_number}-r1`, `-r2`, ...
 
 ## GitHub Actions secrets
 

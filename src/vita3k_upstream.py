@@ -78,7 +78,7 @@ def build_metadata_from_release(release_payload: dict[str, Any]) -> dict[str, An
         "apk_url": android_asset["browser_download_url"],
         "apk_sha256": apk_sha256,
         "release_updated_at": release_payload.get("updated_at"),
-        "release_tag": f"v0.0.{build_number}",
+        "release_tag": f"v{build_number}",
     }
 
 
